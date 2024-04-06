@@ -1,0 +1,23 @@
+POST http://localhost:7000/api/auth/register
+
+{
+"username": "test1",
+"password": "test123"
+}
+
+###
+
+POST http://localhost:7000/api/auth/login
+
+{
+"username": "test1",
+"password": "test123"
+}
+
+###
+GET http://localhost:7000/api/protected/user_demo
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJUaG9tYXMgSGFydG1hbm4iLCJzdWIiOiJ0ZXN0MSIsImV4cCI6MTcxMjM2MjU2NCwicm9sZXMiOiJ1c2VyIiwidXNlcm5hbWUiOiJ0ZXN0MSJ9._MwUcHKygqUFH9RcJjEeYvRH7e0iOzm_WEDJ_VcZmys
+
+###
+GET http://localhost:7000/api/protected/admin_demo
+Authorization: Bearer
