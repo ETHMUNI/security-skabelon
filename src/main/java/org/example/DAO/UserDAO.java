@@ -6,6 +6,8 @@ import jakarta.persistence.EntityNotFoundException;
 import org.example.Ressources.Role;
 import org.example.Ressources.User;
 
+import static org.example.Config.HibernateConfig.getEntityManagerFactory;
+
 public class UserDAO implements ISecurityDAO {
 
     private EntityManagerFactory emf;
@@ -53,5 +55,21 @@ public class UserDAO implements ISecurityDAO {
         if (!user.verifyUser(password))
             throw new EntityNotFoundException("Wrong password");
         return user;
+    }
+
+    public void updatePassword(String username, String newPassword) {
+        EntityManager em = getEntityManagerFactory().createEntityManager();
+        try {
+            em.getTransaction().begin();
+            User user = em.createQuery("SELECT u FROM User u WHERE u.username = :username", User.class)
+                    .setParameter("username", username)
+                    .getSingleResult();
+
+            user.updatePassword(newPassword);
+
+            em.getTransaction().commit();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }

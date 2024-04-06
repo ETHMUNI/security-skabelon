@@ -1,5 +1,6 @@
 package org.example.Handlers;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.nimbusds.jose.JOSEException;
@@ -65,6 +66,36 @@ public class SecurityHandler implements ISecurityHandler {
                 ctx.status(401);
                 System.out.println(e.getMessage());
                 ctx.json(returnObject.put("msg", e.getMessage()));
+            }
+        };
+    }
+
+    @Override
+    public Handler resetPassword() {
+        return (ctx) -> {
+            ObjectNode returnObject = objectMapper.createObjectNode();
+            try {
+                // Extract the user from the context
+                UserDTO currentUser = ctx.attribute("user");
+                if (currentUser == null) {
+                    throw new ApiException(HttpStatus.UNAUTHORIZED.getCode(), "Unauthorized. User not found in session.");
+                }
+
+                // Parse the new password from the request
+                JsonNode requestBody = objectMapper.readTree(ctx.body());
+                String newPassword = requestBody.get("newPassword").asText();
+
+                // Update the user's password
+                userDAO.updatePassword(currentUser.getUsername(), newPassword);
+
+                // Respond to the client
+                ctx.status(HttpStatus.OK);
+                returnObject.put("msg", "Password reset successfully.");
+                ctx.json(returnObject);
+            } catch (Exception e) {
+                ctx.status(HttpStatus.BAD_REQUEST);
+                returnObject.put("msg", e.getMessage());
+                ctx.json(returnObject);
             }
         };
     }

@@ -18,6 +18,8 @@ public class Routes {
             path("/auth", ()->{
                 post("/login", securityHandler.login(),Role.ANYONE);
                 post("/register", securityHandler.register(),Role.ANYONE);
+                before(securityHandler.authenticate());
+                post("/reset-password", securityHandler.resetPassword(), Role.USER);
             });
         };
     }

@@ -15,8 +15,16 @@ POST http://localhost:7000/api/auth/login
 }
 
 ###
+POST http://localhost:7000/api/auth/reset-password
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJUaG9tYXMgSGFydG1hbm4iLCJzdWIiOiJ0ZXN0MSIsImV4cCI6MTcxMjQ0Mzc4Nywicm9sZXMiOiJ1c2VyIiwidXNlcm5hbWUiOiJ0ZXN0MSJ9.E1iPeHvQletLgAs9Vil2zRT943yslXz4aVF3SzW090o
+
+{
+  "newPassword": "newSecurePassword123"
+}
+
+###
 GET http://localhost:7000/api/protected/user_demo
-Authorization: Bearer 
+Authorization: Bearer
 
 ###
 GET http://localhost:7000/api/protected/admin_demo
