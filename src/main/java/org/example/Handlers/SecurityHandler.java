@@ -101,6 +101,20 @@ public class SecurityHandler implements ISecurityHandler {
     }
 
     @Override
+    public Handler logout() {
+        return ctx -> {
+            // Assuming previous middleware has verified the user and token validity
+            UserDTO currentUser = ctx.attribute("user");
+            if (currentUser == null) {
+                throw new ApiException(HttpStatus.UNAUTHORIZED.getCode(), "Unauthorized. User not found in session.");
+            }
+
+            // Inform the client to discard the token
+            ctx.status(HttpStatus.OK).json(objectMapper.createObjectNode().put("msg", "Logout successful. Discard token..."));
+        };
+    }
+
+    @Override
     public String createToken(UserDTO user) {
         String ISSUER;
         String TOKEN_EXPIRE_TIME;
