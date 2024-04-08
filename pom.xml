@@ -128,7 +128,20 @@
             <artifactId>httpclient</artifactId>
             <version>4.5.13</version> <!-- Use the latest version -->
         </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers</artifactId>
+            <version>1.17.3</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>jdbc</artifactId>
+            <version>1.17.3</version>
+            <scope>test</scope>
+        </dependency>
 
-</dependencies>
+
+    </dependencies>
 
 </project>

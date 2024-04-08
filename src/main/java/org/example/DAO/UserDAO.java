@@ -3,6 +3,7 @@ package org.example.DAO;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.TypedQuery;
 import org.example.Ressources.Role;
 import org.example.Ressources.User;
 
@@ -16,6 +17,39 @@ public class UserDAO implements ISecurityDAO {
         this.emf = _emf;
     }
 
+    public User create(User user) {
+        try (var em = emf.createEntityManager()) {
+            em.getTransaction().begin();
+            em.persist(user);
+            em.getTransaction().commit();
+        }
+        return user;
+    }
+
+    public User getById(String username) {
+        try (var em = emf.createEntityManager()) {
+            TypedQuery<User> q = em.createQuery("FROM User h WHERE h.username = :username", User.class);
+            q.setParameter("username", username);
+            return q.getSingleResult();
+        }
+    }
+
+    public User update(User user) {
+        try (var em = emf.createEntityManager()) {
+            em.getTransaction().begin();
+            em.merge(user);
+            em.getTransaction().commit();
+        }
+        return user;
+    }
+    public void delete(User user) {
+        try (var em = emf.createEntityManager()) {
+            em.getTransaction().begin();
+            User deleteUser = em.merge(user);
+            em.remove(deleteUser);
+            em.getTransaction().commit();
+        }
+    }
    @Override
     public User createUser(String username, String password) {
         EntityManager em = emf.createEntityManager();
