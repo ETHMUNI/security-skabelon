@@ -5,8 +5,7 @@ import jakarta.persistence.EntityManagerFactory;
 import org.example.Config.ApplicationConfig;
 import org.example.Config.HibernateConfig;
 
-import static org.example.Routes.Routes.getSecuredRoutes;
-import static org.example.Routes.Routes.getSecurityRoutes;
+import static org.example.Routes.Routes.*;
 
 public class Main {
     public static void main(String[] args) {
@@ -24,5 +23,9 @@ public class Main {
                 .setRoute(getSecurityRoutes())
                 .setRoute(getSecuredRoutes())
                 .checkSecurityRoles();
+    }
+
+    public static void closeServer() {
+        ApplicationConfig.getInstance().stopServer();
     }
 }

@@ -1,10 +1,7 @@
 package org.example.Ressources;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.mindrot.jbcrypt.BCrypt;
 
 import java.util.HashSet;
@@ -15,6 +12,7 @@ import java.util.Set;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode
 @Table(name = "users")
 public class User {
     @Id
