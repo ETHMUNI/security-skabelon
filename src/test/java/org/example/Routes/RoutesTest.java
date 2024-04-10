@@ -42,7 +42,7 @@ class RoutesTest {
                 .body(u)
                 // When: sender jeg en POST til "/auth/register" med user data
                 .when()
-                .post("/auth/register")
+                .post("http://localhost:7000/api/auth/register")
                 // Then: får jeg status kode 200 tilbage
                 .then()
                 .statusCode(200)
