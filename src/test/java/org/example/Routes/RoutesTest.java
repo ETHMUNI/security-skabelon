@@ -20,8 +20,8 @@ class RoutesTest {
 
     @BeforeAll
     static void setUpAll() {
-        RestAssured.baseURI = "http://localhost:7001/api";
-        Main.startServer(7001);
+        RestAssured.baseURI = "http://localhost:7000/api";
+        Main.startServer(7000);
 
     }
 
