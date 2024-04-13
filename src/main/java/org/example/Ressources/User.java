@@ -33,6 +33,13 @@ public class User {
         this.password = BCrypt.hashpw(password, salt);
     }
 
+    // test constructor
+    public User(String username, String password, Role role){
+        this.username = username;
+        setPassword(password);
+        addRole(role);
+    }
+
     public boolean verifyUser(String password) {
         return BCrypt.checkpw(password, this.password);
     }

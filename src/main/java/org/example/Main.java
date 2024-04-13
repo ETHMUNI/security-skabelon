@@ -1,28 +1,23 @@
 package org.example;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+
 import jakarta.persistence.EntityManagerFactory;
 import org.example.Config.ApplicationConfig;
 import org.example.Config.HibernateConfig;
-
-import static org.example.Routes.Routes.getSecuredRoutes;
-import static org.example.Routes.Routes.getSecurityRoutes;
+import org.example.Routes.Routes;
 
 public class Main {
     public static void main(String[] args) {
-        Main.startServer(7000);
-    }
 
-    public static void startServer(int port) {
-        ObjectMapper om = new ObjectMapper();
-        EntityManagerFactory emf = HibernateConfig.getEntityManagerFactory();
+        EntityManagerFactory emf = HibernateConfig.getEntityManagerFactory(false);
+
         ApplicationConfig applicationConfig = ApplicationConfig.getInstance();
         applicationConfig
                 .initiateServer()
-                .startServer(port)
+                .startServer(7000)
                 .setExceptionHandling()
-                .setRoute(getSecurityRoutes())
-                .setRoute(getSecuredRoutes())
+                .setRoute(Routes.getSecurityRoutes(emf))
+                .setRoute(Routes.getSecuredRoutes(emf))
                 .checkSecurityRoles();
     }
 }
