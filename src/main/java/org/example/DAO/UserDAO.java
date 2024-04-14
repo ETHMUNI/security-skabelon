@@ -10,12 +10,19 @@ import static org.example.Config.HibernateConfig.getEntityManagerFactory;
 
 public class UserDAO implements ISecurityDAO {
 
+    private static UserDAO instance;
     private EntityManagerFactory emf;
 
-    public UserDAO(EntityManagerFactory _emf) {
+    private UserDAO(EntityManagerFactory _emf) {
         this.emf = _emf;
     }
 
+    public static UserDAO getInstance(EntityManagerFactory _emf) {
+        if (instance == null) {
+            instance = new UserDAO(_emf);
+        }
+        return instance;
+    }
    @Override
     public User createUser(String username, String password) {
         EntityManager em = emf.createEntityManager();
@@ -58,18 +65,17 @@ public class UserDAO implements ISecurityDAO {
     }
 
     public void updatePassword(String username, String newPassword) {
-        EntityManager em = getEntityManagerFactory().createEntityManager();
-        try {
-            em.getTransaction().begin();
-            User user = em.createQuery("SELECT u FROM User u WHERE u.username = :username", User.class)
-                    .setParameter("username", username)
-                    .getSingleResult();
+        EntityManager em = this.emf.createEntityManager();  // Use the emf passed to the constructor
+        em.getTransaction().begin();
+        User user = em.createQuery("SELECT u FROM User u WHERE u.username = :username", User.class)
+                .setParameter("username", username)
+                .getSingleResult();
 
-            user.updatePassword(newPassword);
+        user.updatePassword(newPassword);
 
-            em.getTransaction().commit();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        em.getTransaction().commit();
+        em.close();
     }
+
+
 }

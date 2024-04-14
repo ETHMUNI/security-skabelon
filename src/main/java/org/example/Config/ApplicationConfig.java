@@ -11,11 +11,12 @@ import org.example.Handlers.ISecurityHandler;
 import org.example.Handlers.SecurityHandler;
 
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 public class ApplicationConfig {
     ObjectMapper om = new ObjectMapper();
-    ISecurityHandler securityHandler = new SecurityHandler();
+
     private Javalin app;
     private static ApplicationConfig instance;
     private ApplicationConfig(){}
@@ -55,7 +56,7 @@ public class ApplicationConfig {
                             .json(om.createObjectNode()
                                     .put("msg","Not authorized. No username were added from the token"));
 
-                if (securityHandler.authorize(user, allowedRoles))
+                if (authorize(user, allowedRoles))
                     handler.handle(ctx);
                 else
                     throw new ApiException(HttpStatus.FORBIDDEN.getCode(), "Unauthorized with roles: "+allowedRoles);
@@ -81,5 +82,18 @@ public class ApplicationConfig {
     }
     public void stopServer(){
         app.stop();
+    }
+
+    public boolean authorize(UserDTO user, Set<String> allowedRoles) {
+
+        AtomicBoolean hasAccess = new AtomicBoolean(false); // Since we update this in a lambda expression, we need to use an AtomicBoolean
+        if (user != null) {
+            user.getRoles().stream().forEach(role -> {
+                if (allowedRoles.contains(role.toUpperCase())) {
+                    hasAccess.set(true);
+                }
+            });
+        }
+        return hasAccess.get();
     }
 }

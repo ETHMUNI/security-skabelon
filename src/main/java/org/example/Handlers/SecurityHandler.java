@@ -10,6 +10,7 @@ import io.javalin.http.Handler;
 import io.javalin.http.HttpStatus;
 import io.javalin.validation.ValidationException;
 import jakarta.persistence.EntityExistsException;
+import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.EntityNotFoundException;
 import org.example.Config.HibernateConfig;
 import org.example.DAO.UserDAO;
@@ -29,9 +30,21 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 public class SecurityHandler implements ISecurityHandler {
-    UserDAO userDAO = new UserDAO(HibernateConfig.getEntityManagerFactory());
+    private static UserDAO userDAO;
     ObjectMapper objectMapper = new ObjectMapper();
     private final String SECRET_KEY = "DetteErEnHemmeligNøgleTilAtDanneJWT_Tokensmed";
+    private static SecurityHandler instance;
+
+    public SecurityHandler(EntityManagerFactory emf) {
+        this.userDAO = UserDAO.getInstance(emf);
+    }
+
+    public static SecurityHandler getInstance(EntityManagerFactory emf) {
+        if (instance == null) {
+            instance = new SecurityHandler(emf);
+        }
+        return instance;
+    }
 
     @Override
     public Handler register() {
@@ -178,21 +191,6 @@ public class SecurityHandler implements ISecurityHandler {
             e.printStackTrace();
             throw new ApiException(HttpStatus.UNAUTHORIZED.getCode(), "Unauthorized. Could not verify token");
         }
-    }
-
-    @Override
-    public boolean authorize(UserDTO user, Set<String> allowedRoles) {
-        // Called from the ApplicationConfig.setSecurityRoles
-
-        AtomicBoolean hasAccess = new AtomicBoolean(false); // Since we update this in a lambda expression, we need to use an AtomicBoolean
-        if (user != null) {
-            user.getRoles().stream().forEach(role -> {
-                if (allowedRoles.contains(role.toUpperCase())) {
-                    hasAccess.set(true);
-                }
-            });
-        }
-        return hasAccess.get();
     }
 
     @Override
