@@ -85,7 +85,6 @@ public class ApplicationConfig {
     }
 
     public boolean authorize(UserDTO user, Set<String> allowedRoles) {
-        // Called from the ApplicationConfig.setSecurityRoles
 
         AtomicBoolean hasAccess = new AtomicBoolean(false); // Since we update this in a lambda expression, we need to use an AtomicBoolean
         if (user != null) {

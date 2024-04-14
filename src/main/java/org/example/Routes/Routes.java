@@ -26,7 +26,6 @@ public class Routes {
         };
     }
 
-    // Similarly, update the getSecuredRoutes method
     public static EndpointGroup getSecuredRoutes(EntityManagerFactory emf){
         securityHandler = SecurityHandler.getInstance(emf); // getting the singleton instance
 
