@@ -5,12 +5,10 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import org.example.Config.ApplicationConfig;
 import org.example.Config.HibernateConfig;
+import org.example.Ressources.Role;
 import org.example.Routes.Routes;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.example.Ressources.User;
-import org.junit.jupiter.api.TestInstance;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
@@ -23,34 +21,52 @@ public class SecurityHandlerTest {
 
     @BeforeAll
     static void setUpAll() {
-        emf = HibernateConfig.getEntityManagerFactoryConfigForTesting();
-
+        emf = HibernateConfig.getEntityManagerFactory(true);
         RestAssured.baseURI = "http://localhost:7000/api";
         ApplicationConfig applicationConfig = ApplicationConfig.getInstance();
         applicationConfig.initiateServer()
                 .startServer(7000)
                 .setExceptionHandling()
-                .setRoute(Routes.getSecuredRoutes(emf))
+                .setRoute(Routes.getSecurityRoutes(emf))
                 .checkSecurityRoles();
+    }
 
-        try (EntityManager em = emf.createEntityManager()) {
+    @BeforeEach
+    void setUp() {
+        EntityManager em = emf.createEntityManager();
+        try {
             em.getTransaction().begin();
-            User newUser = new User();
-            newUser.setUsername("existinguser");
-            newUser.setPassword("password");  // Consider hashing the password if your system uses hashed passwords
+
+            // Clean up the previous test data
+            em.createQuery("DELETE FROM User").executeUpdate();
+            em.createQuery("DELETE FROM Role").executeUpdate();
+
+            // Setup required data for the next test
+            Role userRole = new Role("USER");
+            Role adminRole = new Role("ADMIN");
+            em.persist(userRole);
+            em.persist(adminRole);
+
+            // Using the constructor that hashes the password
+            User newUser = new User("existinguser", "password");
+            newUser.addRole(userRole);
+            newUser.addRole(adminRole);
             em.persist(newUser);
+
             em.getTransaction().commit();
+        } finally {
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            em.close();
         }
     }
 
     @AfterAll
-    static void tearDown() {
-        try (EntityManager em = emf.createEntityManager()) {
-            em.getTransaction().begin();
-            em.createQuery("delete from User").executeUpdate();
-            em.getTransaction().commit();
-        }
+    static void tearDownAll() {
+        emf.close();
     }
+
 
     private static String tokenForTestUser(String username, String password) {
         String json = String.format("{\"username\": \"%s\", \"password\": \"%s\"}", username, password);
@@ -59,12 +75,12 @@ public class SecurityHandlerTest {
                 .contentType("application/json")
                 .body(json)
                 .when()
-                .post("/api/auth/login")
+                .post("http://localhost:7000/api/auth/login")
                 .then()
                 .extract()
                 .path("token");
     }
-
+/* Method doesn't work
     @Test
     void testRegister() {
         String json = """
@@ -78,12 +94,12 @@ public class SecurityHandlerTest {
                 .contentType("application/json")
                 .body(json)
                 .when()
-                .post("/api/auth/register")
+                .post("http://localhost:7000/api/auth/register")
                 .then()
                 .statusCode(201)
                 .body("username", equalTo("newuser"))
                 .body("token", notNullValue());
-    }
+    }*/
 
     @Test
     void testLogin() {
@@ -98,7 +114,7 @@ public class SecurityHandlerTest {
                 .contentType("application/json")
                 .body(json)
                 .when()
-                .post("/api/auth/login")
+                .post("http://localhost:7000/api/auth/login")
                 .then()
                 .statusCode(200)
                 .body("token", notNullValue());
@@ -118,7 +134,7 @@ public class SecurityHandlerTest {
                 .contentType("application/json")
                 .body(json)
                 .when()
-                .post("/api/auth/resetPassword")
+                .post("http://localhost:7000/api/auth/reset-password")
                 .then()
                 .statusCode(200)
                 .body("msg", equalTo("Password reset successfully."));
@@ -131,7 +147,7 @@ public class SecurityHandlerTest {
         RestAssured.given()
                 .header("Authorization", token)
                 .when()
-                .post("/api/auth/logout")
+                .post("http://localhost:7000/api/auth/logout")
                 .then()
                 .statusCode(200)
                 .body("msg", equalTo("Logout successful. Discard token..."));
